@@ -119,7 +119,7 @@ class Updater implements IUpdater {
 	 * @param string $path
 	 * @param int $time
 	 */
-	public function update($path, $time = null) {
+	public function update($path, $time = null, ?int $sizeDifference = null) {
 		if (!$this->enabled or Scanner::isPartialFile($path)) {
 			return;
 		}
@@ -135,10 +135,10 @@ class Updater implements IUpdater {
 			$sizeDifference = $data['size'] - $data['oldSize'];
 		} else {
 			// scanner didn't provide size info, fallback to full size calculation
-			$sizeDifference = 0;
-			if ($this->cache instanceof Cache) {
+			if ($this->cache instanceof Cache && $sizeDifference === null) {
 				$this->cache->correctFolderSize($path, $data);
 			}
+			$sizeDifference = $sizeDifference ?? 0;
 		}
 		$this->correctParentStorageMtime($path);
 		$this->propagator->propagateChange($path, $time, $sizeDifference);
